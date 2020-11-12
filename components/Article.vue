@@ -1,9 +1,9 @@
 <template lang="pug">
   .article
-    .article__img(:style="{'background-image': `url(${article.img})`}")
+    .article__img(:style="{'background-image': `url(${article.acf.primary_image})`}")
     .article__content
-      .article__title {{ article.title }}
-      .article__text {{ article.text }}
+      .article__title {{ article.acf.title }}
+      .article__text {{ article.acf.description }}
       RouterButton(:href="href")
 </template>
 

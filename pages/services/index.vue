@@ -1,14 +1,18 @@
 <template lang="pug">
 .services-page-bg
-  section.services-page
+  section.services-page(v-if="services && services.length")
     SectionTitle(title="Товары и услуги")
     .services-page__list
-      Article.services-page__item(v-for="(article, a) in services" :key="a" :article="article" :href="`/services/${article.id}`")
+      Article.services-page__item(
+        v-for="(article, a) in services"
+        :key="a"
+        :article="article"
+        :href="`/services/${article.id}`")
 </template>
 
 <script>
 import Article from '../../components/Article'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'Blog',
@@ -20,7 +24,15 @@ export default {
       'services'
     ])
   },
+  methods: {
+    ...mapActions([
+      'fetchServices'
+    ])
+  },
   fetchOnServer: true,
+  async fetch() {
+    await this.fetchServices();
+  }
 }
 </script>
 

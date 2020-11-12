@@ -1,26 +1,39 @@
 <template lang="pug">
 .blog-page-bg
-  section.blog-page
+  section.blog-page(v-if="articles && articles.length")
     SectionTitle(title="Блог")
     .blog-page__list
-      Article.blog-page__item(v-for="(article, a) in blog" :key="a" :article="article" :href="`/blog/${article.id}`")
+      Article.blog-page__item(v-for="(article, a) in articles" :key="a" :article="article" :href="`/blog/${article.id}`")
 </template>
 
 <script>
 import Article from '../../components/Article'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'Blog',
   components: {
     Article
   },
+  data() {
+    return {
+      currentArticle: null
+    }
+  },
   computed: {
     ...mapState([
-      'blog'
+      'articles'
+    ])
+  },
+  methods: {
+    ...mapActions([
+      'fetchArticles'
     ])
   },
   fetchOnServer: true,
+  async fetch() {
+    await this.fetchArticles();
+  }
 }
 </script>
 

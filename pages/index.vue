@@ -5,26 +5,25 @@
       .poster__contacts
         GreenButton(:imgUrl="phone" href="tel:+380660131000")
         GreenButton(:imgUrl="email" href="tel:+380660131000")
-    section.services
+    section.services(v-if="services && services.length")
       .services__container
         ul.services__list
-          li.services__item( v-for="service in services")
-            nuxt-link.services__link(:to="service.link")
-              img(:src="service.url")
-              span {{ service.title }}
-    section.about
+          li.services__item( v-for="service in services.slice(0,5)")
+            nuxt-link.services__link(:to="`/services/${service.id}`")
+              img(:src="service.acf.link_image")
+              span {{ service.acf.title }}
+    section.about(v-if="general && general.about")
       .about__container
         SectionTitle(title="О нас")
-        .about__content
-          p(v-for="p in about") {{ p }}
-    section.advantages
+        .about__content(v-html="general.about")
+    section.advantages(v-if="general && general.advantages")
       .advantages__title Преимущества работы с нами
       ul.advantages__list
-        li.advantages__item(v-for="(adv, a) in advantages")
+        li.advantages__item(v-for="(adv, a) in general.advantages")
           .advantages__count
             span {{ a + 1 }}
-          .advantages__description {{ adv }}
-    section.gallery
+          .advantages__description {{ adv.text }}
+    section.gallery(v-if="gallery && gallery.length")
       .gallery__title
         SectionTitle(title="Фото")
       Carousel.gallery__slider.gallery__slider_desk(:slides="gallery" :options="{ slidesToShow: 4, slidesToScroll: 4, dots: true, arrow: true}")
@@ -35,19 +34,19 @@
           div.gallery__slide(:style="{'background-image': `url(${props.item})`}")
       .gallery__btn-container
         RouterButton.gallery__btn(href="/photo")
-    section.testimonials
+    section.testimonials(v-if="general && general.testimonials")
       .testimonials__title Отзывы
-      Carousel.testimonials__slider.testimonials__slider_desk(:slides="testimonials", :options="{ slidesToShow: 3, slidesToScroll: 1, dots: false, arrow: true }", arrowsStyle="arrows-out")
+      Carousel.testimonials__slider.testimonials__slider_desk(:slides="general.testimonials", :options="{ slidesToShow: 3, slidesToScroll: 1, dots: false, arrow: true }", arrowsStyle="arrows-out")
         template(v-slot:slide="props")
           div.testimonials__slide
             .testimonials__logo
               img(:src="props.item.logo")
             .testimonials__name {{ props.item.name }}
             .testimonials__raiting
-              img.testimonials__star(:src="startFilled" v-for="s in props.item.raiting")
-              img.testimonials__star(:src="starStroked" v-for="s in (5 - props.item.raiting)")
+              img.testimonials__star(:src="startFilled" v-for="s in +props.item.raiting")
+              img.testimonials__star(:src="starStroked" v-for="s in (5 - +props.item.raiting)")
             p {{ props.item.text }}
-      Carousel.testimonials__slider.testimonials__slider_mob(:slides="testimonials", :options="{ slidesToShow: 1, slidesToScroll: 1, dots: false, arrow: true }", arrowsStyle="arrows-out")
+      Carousel.testimonials__slider.testimonials__slider_mob(:slides="general.testimonials", :options="{ slidesToShow: 1, slidesToScroll: 1, dots: false, arrow: true }", arrowsStyle="arrows-out")
         template(v-slot:slide="props")
           div.testimonials__slide
             .testimonials__logo
@@ -60,12 +59,12 @@
     section.blog
       .blog__container
         SectionTitle(title="Блог")
-        .blog__list
-          Article.blog__item(v-for="(article, a) in blog.slice(0, 3)" :key="a" :article="article" :href="`/blog/${article.id}`")
+        .blog__list(v-if="articles && articles.length")
+          Article.blog__item(v-for="(article, a) in articles.slice(0, 3)" :key="a" :article="article" :href="`/blog/${article.id}`")
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import GreenButton from '../components/GreenButton';
 import SectionTitle from '../components/SectionTitle';
 import Carousel from '../components/Carousel';
@@ -100,19 +99,29 @@ export default {
       'advantages',
       'gallery',
       'testimonials',
-      'blog'
+      'articles',
+      'general'
     ])
   },
-  // async fetch() {
-  // },
+  methods: {
+    ...mapActions([
+      'fetchServices',
+      'fetchArticles',
+      'fetchGallery',
+      'fetchGeneral'
+    ])
+  },
+  async fetch() {
+    await this.fetchServices();
+    await this.fetchArticles();
+    await this.fetchGallery();
+    await this.fetchGeneral();
+  },
   fetchOnServer: true,
 }
 </script>
 
 <style lang="scss">
-  // section {
-  //   overflow: hidden;
-  // }
   .poster {
     padding: 0 20vw;
     background-image: url('../static/poster.png');

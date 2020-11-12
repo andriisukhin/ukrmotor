@@ -1,15 +1,15 @@
 <template lang="pug">
 .service-page-bg
   .service-page(v-if="currentService")
-    SectionTitle(:title="currentService.title")
+    SectionTitle(:title="currentService.acf.title")
     .service-page__container
       .service-page__poster-service.poster-service
-        .poster-service__img(:style="{'background-image': `url(${currentService.img})`}")
-        .poster-service__text {{ currentService.text }}
+        .poster-service__img(:style="{'background-image': `url(${currentService.acf.primary_image})`}")
+        .poster-service__text {{ currentService.acf.description }}
       .service-page__content.content
-        .content__block(v-for="(block, b) in currentService.blocks" :style="{'flex-direction': b % 2 === 0 ? 'row-reverse' : 'row'}")
-          .content__img(v-if="block.photo" :style="{'background-image': `url(${block.photo})`}")
-          .content__text(v-html="block.text" :class="{'content__text_fullwidth': !block.photo}")
+        .content__block(v-for="(block, b) in currentService.acf.blocks" :style="{'flex-direction': b % 2 === 0 ? 'row-reverse' : 'row'}")
+          .content__img(v-if="block.img" :style="{'background-image': `url(${block.img.url})`}")
+          .content__text(v-html="block.text" :class="{'content__text_fullwidth': !block.img}")
       .service-page__contacts
         div
           strong Наши контакты:
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import SectionTitle from '../../components/SectionTitle'
 
 export default {
@@ -36,9 +36,14 @@ export default {
       'services'
     ])
   },
-  created() {
-    this.currentService = this.services.find(item => item.id === this.$route.params.id);
-    // this.currentService = JSON.parse(JSON.stringify(this.services.find(item => item.id === this.$route.params.id)))
+  methods: {
+    ...mapActions([
+      'fetchServices'
+    ])
+  },
+  async fetch() {
+    await this.fetchServices();
+    this.currentService = this.services.find(item => +item.id === +this.$route.params.id);
   },
   fetchOnServer: true,
 }
@@ -69,6 +74,13 @@ export default {
         margin: 20px 0;
         font-weight: 400;
       }
+
+      img {
+        width: 70%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
     }
     &__contacts {
       margin-top: 50px;
@@ -90,6 +102,7 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin: 20px 0;
       }
       &__img {
         width: 35%;
@@ -117,6 +130,11 @@ export default {
     .service-page {
       &__poster-service {
         flex-direction: column;
+      }
+      &__content {
+        img {
+          width: 100%;
+        }
       }
       .poster-service {
         &__img {
